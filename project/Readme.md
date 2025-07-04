@@ -2,7 +2,7 @@
 
 A comprehensive full-stack platform that connects entrepreneurs with investors, bankers, and business advisors. Built with React, TypeScript, Node.js, and MongoDB.
 
-![Bridge Platform](https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=1200&h=400&fit=crop&crop=center)
+
 
 ## 🌟 Overview
 
