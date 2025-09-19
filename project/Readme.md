@@ -141,14 +141,25 @@ cd ..
 
 3. **Environment Setup**
 
-Create `.env` file in the backend directory:
+⚠️ **IMPORTANT**: Copy the environment template and configure it:
+
+```bash
+# Copy environment template in backend directory
+cd backend
+cp .env.example .env
+cd ..
+```
+
+Then edit `backend/.env` with your configuration:
 ```env
 # Server Configuration
 PORT=5000
 NODE_ENV=development
 
-# Database Configuration
-MONGODB_URI=mongodb://localhost:27017/bridge_db
+# Database Configuration (IMPORTANT!)
+MONGO_URI=mongodb://localhost:27017/bridge
+# For MongoDB Atlas: 
+# MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/Bridge?retryWrites=true&w=majority
 
 # JWT Configuration
 JWT_SECRET=your_super_secret_jwt_key_here

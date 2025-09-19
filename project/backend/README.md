@@ -79,17 +79,24 @@ npm install
 
 ### 2. Environment Configuration
 
-Create a `.env` file in the backend directory:
+**IMPORTANT**: Copy the example environment file and configure it:
+
+```bash
+# Copy the example environment file
+cp .env.example .env
+```
+
+Then edit the `.env` file with your configuration:
 
 ```env
 # Server Configuration
 PORT=5000
 NODE_ENV=development
 
-# Database Configuration
-MONGODB_URI=mongodb://localhost:27017/bridge_db
+# Database Configuration (IMPORTANT!)
+MONGO_URI=mongodb://localhost:27017/bridge
 # For MongoDB Atlas:
-# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/bridge_db
+# MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/Bridge?retryWrites=true&w=majority
 
 # JWT Configuration
 JWT_SECRET=your_super_secret_jwt_key_here_make_it_very_long_and_secure
@@ -97,6 +104,9 @@ JWT_EXPIRE=7d
 
 # CORS Configuration
 CLIENT_URL=http://localhost:5173
+```
+
+**⚠️ Note**: The `.env` file is gitignored for security. Each developer must create their own `.env` file using the `.env.example` template.
 
 # File Upload Configuration
 MAX_FILE_SIZE=5242880
@@ -280,7 +290,41 @@ CLIENT_URL=your_frontend_domain
 - **Efficient Pagination** for large datasets
 - **Connection Pooling** with Mongoose
 
-## 🔧 Development Tools
+## � Troubleshooting
+
+### Common Issues
+
+#### "The 'uri' parameter to 'openUri()' must be a string, got 'undefined'"
+
+This error occurs when the `MONGO_URI` environment variable is not set.
+
+**Solution:**
+1. Make sure you have a `.env` file in the backend directory
+2. Copy from `.env.example`: `cp .env.example .env`
+3. Set your MongoDB connection string in the `.env` file
+4. For local development: `MONGO_URI=mongodb://localhost:27017/bridge`
+5. For MongoDB Atlas: Use your cluster connection string
+
+#### "JWT must be provided"
+
+This error occurs when authentication tokens are missing or invalid.
+
+**Solution:**
+1. Make sure `JWT_SECRET` is set in your `.env` file
+2. Use a strong, unique secret key
+3. Check that the frontend is sending the authorization header
+
+#### "Failed to connect to MongoDB"
+
+This error occurs when MongoDB is not running or the connection string is incorrect.
+
+**Solution:**
+1. For local MongoDB: Make sure MongoDB service is running
+2. For MongoDB Atlas: Check your connection string and network access
+3. Verify your database credentials
+4. Check firewall settings
+
+## �🔧 Development Tools
 
 ```bash
 # Install nodemon for development
