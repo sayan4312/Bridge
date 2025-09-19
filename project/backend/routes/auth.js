@@ -9,13 +9,12 @@ import {
 } from '../controllers/authController.js';
 import { protect } from '../middlewares/auth.js';
 import { validateRegister, validateLogin } from '../middlewares/validation.js';
-import { authLimiter } from '../middlewares/rateLimiter.js';
 
 const router = express.Router();
 
 // Public routes
-router.post('/register', authLimiter, validateRegister, register);
-router.post('/login', authLimiter, validateLogin, login);
+router.post('/register', validateRegister, register);
+router.post('/login', validateLogin, login);
 
 // Protected routes
 router.use(protect); // All routes after this middleware are protected

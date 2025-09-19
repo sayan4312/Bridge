@@ -11,13 +11,13 @@ import { Server } from 'socket.io';
 
 import connectDB from './config/database.js';
 import errorHandler from './middlewares/errorHandler.js';
-import { generalLimiter } from './middlewares/rateLimiter.js';
 import authRoutes from './routes/auth.js';
 import businessIdeaRoutes from './routes/businessIdeas.js';
 import investmentProposalRoutes from './routes/investmentProposals.js';
 import loanOfferRoutes from './routes/loanOffers.js';
 import consultationRoutes from './routes/consultations.js';
 import notificationRoutes from './routes/notifications.js';
+import chatRoutes from './routes/chat.js';
 
 dotenv.config();
 
@@ -66,7 +66,6 @@ const startServer = async () => {
 
     // Rate limiter and static files
     app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-    app.use(generalLimiter);
 
     // Health check route
     app.get('/health', (req, res) => {
@@ -85,6 +84,7 @@ const startServer = async () => {
     app.use('/api/loan-offers', loanOfferRoutes);
     app.use('/api/consultations', consultationRoutes);
     app.use('/api/notifications', notificationRoutes);
+    app.use('/api/chat', chatRoutes);
 
     // 404 fallback
     app.all('*', (req, res) => {
@@ -106,17 +106,39 @@ const startServer = async () => {
       }
     });
 
-    // Example: handle connection
+    // Chat room connection handling
     io.on('connection', (socket) => {
-      console.log('🔌 New client connected:', socket.id);
 
-      // Optionally: join room by user ID
-      socket.on('join', ({ userId }) => {
-        socket.join(userId);
+      // Join user's personal room for notifications
+      socket.on('join_user', ({ userId }) => {
+        socket.join(`user_${userId}`);
+      });
+
+      // Join chat room
+      socket.on('join_chat_room', ({ chatRoomId }) => {
+        socket.join(`chat_${chatRoomId}`);
+      });
+
+      // Leave chat room
+      socket.on('leave_chat_room', ({ chatRoomId }) => {
+        socket.leave(`chat_${chatRoomId}`);
+      });
+
+      // Typing indicator
+      socket.on('typing_start', ({ chatRoomId, userId, userName }) => {
+        socket.to(`chat_${chatRoomId}`).emit('user_typing', { userId, userName });
+      });
+
+      socket.on('typing_stop', ({ chatRoomId, userId }) => {
+        socket.to(`chat_${chatRoomId}`).emit('user_stopped_typing', { userId });
+      });
+
+      // User presence
+      socket.on('user_online', ({ userId }) => {
+        socket.broadcast.emit('user_status_change', { userId, status: 'online' });
       });
 
       socket.on('disconnect', () => {
-        console.log('🔌 Client disconnected:', socket.id);
       });
     });
 
@@ -124,29 +146,22 @@ const startServer = async () => {
     app.set('io', io);
 
     server.listen(PORT, () => {
-      console.log(`✅ Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
     });
 
     // Global error handlers
     process.on('unhandledRejection', (err) => {
-      console.error('❌ Unhandled Promise Rejection:', err);
-      server.close(() => process.exit(1));
+      process.exit(1);
     });
 
     process.on('uncaughtException', (err) => {
-      console.error('❌ Uncaught Exception:', err);
       process.exit(1);
     });
 
     process.on('SIGTERM', () => {
-      console.warn('⚠️ SIGTERM received. Shutting down gracefully...');
-      server.close(() => {
-        console.log('🛑 Process terminated');
-      });
+      process.exit(1);
     });
 
   } catch (err) {
-    console.error('❌ Failed to start server:', err.message);
     process.exit(1);
   }
 };

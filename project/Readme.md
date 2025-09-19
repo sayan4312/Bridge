@@ -2,7 +2,7 @@
 
 A comprehensive full-stack platform that connects entrepreneurs with investors, bankers, and business advisors. Built with React, TypeScript, Node.js, and MongoDB.
 
-![Bridge Platform](https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=1200&h=400&fit=crop&crop=center)
+
 
 ## 🌟 Overview
 
@@ -41,6 +41,16 @@ Bridge is a modern business networking platform designed to facilitate connectio
 - **Activity Monitoring** and logging
 - **Error Handling** with user-friendly messages
 - **Performance Optimization** with lazy loading
+
+### 💬 Real-Time Chat System
+- **Socket.IO Integration** for real-time messaging
+- **Auto-Chat Room Creation** when investment proposals are submitted
+- **Typing Indicators** showing when users are typing
+- **Online/Offline Status** for all participants
+- **Message Persistence** with MongoDB storage
+- **Unread Message Counts** and notifications
+- **Secure Chat Rooms** with participant-only access
+- **Business Idea Context** in chat rooms
 
 ## 🏗️ Architecture
 

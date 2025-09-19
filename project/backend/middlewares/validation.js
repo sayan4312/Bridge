@@ -161,3 +161,16 @@ export const validatePagination = [
     .withMessage('Limit must be between 1 and 100'),
   handleValidationErrors
 ];
+
+// Message validation rules
+export const validateMessage = [
+  body('content')
+    .trim()
+    .isLength({ min: 1, max: 1000 })
+    .withMessage('Message content must be between 1 and 1000 characters'),
+  body('messageType')
+    .optional()
+    .isIn(['text', 'file', 'system'])
+    .withMessage('Invalid message type'),
+  handleValidationErrors
+];

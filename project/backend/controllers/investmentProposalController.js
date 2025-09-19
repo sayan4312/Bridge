@@ -1,6 +1,7 @@
 import InvestmentProposal from '../models/InvestmentProposal.js';
 import BusinessIdea from '../models/BusinessIdea.js';
 import ActivityLog from '../models/ActivityLog.js';
+import ChatRoom from '../models/ChatRoom.js';
 import { createNotification } from './notificationController.js';
 
 // @desc    Get investment proposals
@@ -45,7 +46,6 @@ export const getInvestmentProposals = async (req, res, next) => {
       data: { proposals }
     });
   } catch (error) {
-    console.error('❌ Get investment proposals error:', error.message);
     next(error);
   }
 };
@@ -67,7 +67,6 @@ export const getInvestmentProposal = async (req, res, next) => {
 
     res.status(200).json({ success: true, data: { proposal } });
   } catch (error) {
-    console.error('❌ Get proposal error:', error.message);
     next(error);
   }
 };
@@ -111,6 +110,26 @@ export const createInvestmentProposal = async (req, res, next) => {
       req
     );
 
+    // Create chat room automatically when proposal is submitted
+    try {
+      // Ensure we pass only ObjectId strings
+      const investorId = req.user._id.toString();
+      const businessOwnerId = idea.userId._id ? idea.userId._id.toString() : idea.userId.toString();
+      const businessIdeaId = idea._id.toString();
+      const investmentProposalId = proposal._id.toString();
+      const chatRoom = await ChatRoom.findOrCreateChatRoom(
+        investorId,
+        businessOwnerId,
+        businessIdeaId,
+        investmentProposalId
+      );
+      if (!chatRoom) {
+        console.error(`[createInvestmentProposal] Chat room creation returned null/undefined!`);
+      }
+    } catch (chatError) {
+      console.error('❌ Error creating chat room:', chatError);
+    }
+
     await createNotification(
       idea.userId,
       'INVESTMENT_PROPOSAL_RECEIVED',
@@ -122,11 +141,8 @@ export const createInvestmentProposal = async (req, res, next) => {
       req
     );
 
-    console.log(`✅ Proposal created by ${req.user.email}`);
-
     res.status(201).json({ success: true, data: { proposal } });
   } catch (error) {
-    console.error('❌ Create proposal error:', error.message);
     next(error);
   }
 };
@@ -190,11 +206,8 @@ export const updateProposalStatus = async (req, res, next) => {
       req
     );
 
-    console.log(`📩 Proposal ${status} by ${req.user.email}`);
-
     res.status(200).json({ success: true, data: { proposal } });
   } catch (error) {
-    console.error('❌ Update proposal status error:', error.message);
     next(error);
   }
 };
@@ -225,11 +238,8 @@ export const withdrawProposal = async (req, res, next) => {
       req
     );
 
-    console.log(`❌ Proposal withdrawn by ${req.user.email}`);
-
     res.status(200).json({ success: true, message: 'Proposal withdrawn successfully' });
   } catch (error) {
-    console.error('❌ Withdraw proposal error:', error.message);
     next(error);
   }
 };
@@ -281,7 +291,6 @@ export const getProposalsForBusinessIdea = async (req, res, next) => {
       data: { proposals }
     });
   } catch (error) {
-    console.error('❌ Get proposals for idea error:', error.message);
     next(error);
   }
 };

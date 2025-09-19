@@ -54,6 +54,18 @@ export const API_ENDPOINTS = {
     MARK_ALL_READ: `${API_BASE_URL}/notifications/mark-all-read`,
     CLEAR_READ: `${API_BASE_URL}/notifications/clear-read`,
     STATS: `${API_BASE_URL}/notifications/stats`,
+  },
+
+  // Chat endpoints
+  CHAT: {
+    ROOMS: `${API_BASE_URL}/chat/rooms`,
+    SINGLE_ROOM: (id: string) => `${API_BASE_URL}/chat/rooms/${id}`,
+    SEND_MESSAGE: (roomId: string) => `${API_BASE_URL}/chat/rooms/${roomId}/messages`,
+    MARK_READ: (roomId: string) => `${API_BASE_URL}/chat/rooms/${roomId}/read`,
+    CREATE_FROM_PROPOSAL: `${API_BASE_URL}/chat/create-from-proposal`,
+    UNREAD_COUNT: `${API_BASE_URL}/chat/unread-count`,
+    DELETE_MESSAGE: (messageId: string) => `${API_BASE_URL}/chat/messages/${messageId}`,
+    DELETE_ROOM: (id: string) => `${API_BASE_URL}/chat/rooms/${id}`,
   }
 };
 

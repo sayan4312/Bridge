@@ -15,6 +15,8 @@ import LoanOffers from './pages/LoanOffers';
 import Consultations from './pages/Consultations';
 import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
+import Chat from './pages/Chat';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Layout
 import Layout from './components/Layout/Layout';
@@ -121,6 +123,20 @@ function App() {
                   isAuthenticated ? (
                     <Layout>
                       <Profile />
+                    </Layout>
+                  ) : (
+                    <Navigate to="/auth" />
+                  )
+                }
+              />
+              <Route
+                path="/chat"
+                element={
+                  isAuthenticated ? (
+                    <Layout>
+                      <ErrorBoundary>
+                        <Chat />
+                      </ErrorBoundary>
                     </Layout>
                   ) : (
                     <Navigate to="/auth" />

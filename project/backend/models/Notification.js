@@ -21,7 +21,8 @@ const notificationSchema = new mongoose.Schema({
       'SYSTEM_ANNOUNCEMENT',
       'PROFILE_UPDATE',
       'PASSWORD_CHANGED',
-      'LOGIN_ALERT'
+      'LOGIN_ALERT',
+      'NEW_MESSAGE'
     ],
     required: true
   },

@@ -7,6 +7,7 @@ import { consultationService, Consultation, ConsultationCreateData, Consultation
 import { logAction } from '../utils/logger';
 import toast from 'react-hot-toast';
 import { useAuthStore } from './authStore';
+import { useChatStore } from './chatStore';
 
 interface BusinessState {
   // Business Ideas
@@ -401,6 +402,12 @@ export const useBusinessStore = create<BusinessState>()(
               proposalId: response.data.proposal._id,
               businessIdeaId: data.businessIdeaId,
             });
+
+            // Refresh chat rooms to show the newly created chat room
+            const { fetchChatRooms } = useChatStore.getState();
+            if (fetchChatRooms) {
+              await fetchChatRooms();
+            }
 
             toast.success('Investment proposal submitted successfully!');
             return true;

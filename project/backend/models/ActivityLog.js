@@ -35,12 +35,15 @@ const activityLogSchema = new mongoose.Schema({
       'LIKE_BUSINESS_IDEA',
       'UNLIKE_BUSINESS_IDEA',
       'COMMENT_CREATED',
-      'COMMENT_DELETED'
+      'COMMENT_DELETED',
+      'ALL_NOTIFICATIONS_READ'
     ]
   },
   resourceType: {
     type: String,
-    enum: ['User', 'BusinessIdea', 'InvestmentProposal', 'LoanOffer', 'Consultation', 'ActivityLog'],
+    enum: ['User', 'BusinessIdea', 'InvestmentProposal', 'LoanOffer', 'Consultation', 'ActivityLog',
+    'Notification'
+    ],
     required: true
   },
   resourceId: {

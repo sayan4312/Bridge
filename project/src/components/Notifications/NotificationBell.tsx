@@ -196,12 +196,15 @@ const NotificationBell = () => {
                                 {!notification.isRead && (
                                   <div className="w-2 h-2 bg-blue-500 rounded-full" />
                                 )}
-                                <button
+                                <span
+                                  role="button"
+                                  tabIndex={0}
                                   onClick={(e) => handleDeleteNotification(e, notification._id)}
-                                  className="p-1 text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                  className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors cursor-pointer"
+                                  title="Delete notification"
                                 >
-                                  <Trash2 className="w-3 h-3" />
-                                </button>
+                                  <Trash2 className="w-4 h-4" />
+                                </span>
                               </div>
                             </div>
                             

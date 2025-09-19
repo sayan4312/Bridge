@@ -15,10 +15,12 @@ import {
   TrendingUp,
   X,
   Trash,
+  MessageSquare,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 import { businessIdeaService } from '../services/businessIdeaService';
+import { useChatStore } from '../store/chatStore';
 
 // Define the schema for business idea form validation
 const businessIdeaSchema = z.object({
@@ -55,6 +57,7 @@ const BusinessIdeas = () => {
   const [investmentAmount, setInvestmentAmount] = useState('');
   const [investmentType, setInvestmentType] = useState('equity');
   const [investmentTerms, setInvestmentTerms] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('all');
 
   const form = useForm<BusinessIdeaForm>({
     resolver: zodResolver(businessIdeaSchema),
@@ -68,14 +71,14 @@ const BusinessIdeas = () => {
       // Reset business store to clear stale data
       reset();
       if (user.role === 'business_person') {
-        fetchMyBusinessIdeas({ status: 'active' }); // Fetch user-specific ideas
+        fetchMyBusinessIdeas(); // Fetch all user-specific ideas
       } else {
-        fetchBusinessIdeas({ status: 'active' }); // Fetch all ideas
+        fetchBusinessIdeas(); // Fetch all ideas
       }
     } else {
       // For unauthenticated users, fetch all ideas
       reset();
-      fetchBusinessIdeas({ status: 'active' });
+      fetchBusinessIdeas();
     }
     fetchInvestmentProposals(); // <-- Always fetch proposals on mount
   }, [isAuthenticated, user, fetchBusinessIdeas, fetchMyBusinessIdeas, fetchInvestmentProposals, reset]);
@@ -102,7 +105,9 @@ const BusinessIdeas = () => {
       const matchesCategory =
         selectedCategory === 'all' ||
         idea.category.toLowerCase() === selectedCategory.toLowerCase();
-      return matchesSearch && matchesCategory;
+      const matchesStatus =
+        selectedStatus === 'all' || idea.status === selectedStatus;
+      return matchesSearch && matchesCategory && matchesStatus;
     }
   );
 
@@ -176,8 +181,9 @@ const BusinessIdeas = () => {
   // Robust proposal-idea ID comparison
   const getProposalsForIdea = (ideaId: string) => {
     return investmentProposals.filter((proposal) => {
+      if (!proposal.businessIdeaId) return false;
       const proposalIdeaId =
-        typeof proposal.businessIdeaId === 'object'
+        typeof proposal.businessIdeaId === 'object' && proposal.businessIdeaId !== null
           ? proposal.businessIdeaId._id
           : proposal.businessIdeaId;
       return proposalIdeaId?.toString() === ideaId?.toString();
@@ -257,6 +263,22 @@ const BusinessIdeas = () => {
             ))}
           </select>
         </div>
+
+        {user?.role === 'business_person' && (
+          <div className="relative">
+            <Filter className="absolute top-3 left-3 text-gray-400 w-5 h-5" />
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="pl-10 pr-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50"
+            >
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="funded">Funded</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Loading and Error States */}
@@ -335,16 +357,51 @@ const BusinessIdeas = () => {
                   </div>
                   
                   {user?.role === 'investor' && !isMyIdea(idea) && (
-                    <button
-                      onClick={e => {
-                        e.stopPropagation();
-                        setSelectedIdea(idea);
-                        setShowInvestModal(true);
-                      }}
-                      className="bg-green-600 text-white text-sm px-4 py-2 rounded-xl hover:bg-green-700 transition"
-                    >
-                      Invest
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          setSelectedIdea(idea);
+                          setShowInvestModal(true);
+                        }}
+                        className="bg-green-600 text-white text-sm px-4 py-2 rounded-xl hover:bg-green-700 transition"
+                      >
+                        Invest
+                      </button>
+                      <button
+                        onClick={async e => {
+                          e.stopPropagation();
+                          // Find the user's proposal for this idea
+                          const myProposal = getProposalsForIdea(idea._id).find(
+                            (proposal) => {
+                              const investorId = typeof proposal.investorId === 'object' ? proposal.investorId._id : proposal.investorId;
+                              return investorId === user?.id;
+                            }
+                          );
+                          if (!myProposal) {
+                            toast.error('You must submit an investment proposal before starting a chat.');
+                            return;
+                          }
+                          // Create or get chat room for this proposal
+                          const created = await useChatStore.getState().createChatRoomFromProposal({ investmentProposalId: myProposal._id });
+                          if (created) {
+                            // Find the chat room just created or fetched
+                            const chatRooms = useChatStore.getState().chatRooms;
+                            const chatRoom = chatRooms.find(room => room.investmentProposalId?._id === myProposal._id);
+                            if (chatRoom) {
+                              useChatStore.getState().selectChatRoom(chatRoom);
+                            }
+                            window.location.href = '/chat';
+                          } else {
+                            toast.error('Failed to create or open chat room.');
+                          }
+                        }}
+                        className="bg-blue-600 text-white text-sm px-4 py-2 rounded-xl hover:bg-blue-700 transition flex items-center gap-1"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                        Chat
+                      </button>
+                    </div>
                   )}
                 </div>
               </motion.div>
